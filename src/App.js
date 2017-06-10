@@ -1,75 +1,79 @@
 import React, { Component } from 'react';
+import v4 from 'uuid/v4';
+import PropTypes from 'prop-types';
 import logo from './logo.svg';
 import './App.css';
-import PropTypes from 'prop-types';
 
-class Item extends Component{
-  static propTypes = {
-    lang: PropTypes.string.isRequired,
-  }
+class Item extends Component {
+  // static propTypes = {
+  //   lang: PropTypes.string.isRequired,
+  // }
   static defaultProps = {
-    lang: 'lalala',
-    age: 100
-
+    age: 100,
   }
-  render() {
-    return <li onClick = {() => this.props.c(this.props.lang)}>
-              {this.props.lang}
-           </li>
+  render(){
+    return (
+      <li key={this.props.lang.id}
+          onClick={() => {
+            this.props.clickCallback(this.props.lang.name);
+          }}>
+        {this.props.lang.name}
+      </li>
+    )
   }
 }
 
+var store = [
+  {id: v4(), name: 'Ruby', score: 0},
+  {id: v4(), name: 'Elixir', score: 0},
+  {id: v4(), name: 'JavaScript', score: 0},
+  {id: v4(), name: 'LISP', score: 0},
+]
+
 class App extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
-
-    let langs = ["Ruby", "JavaScript", "Elixir"]
-    let scores = {"Ruby": 0, "JavaScript": 0, "Elixir": 0};
-
-    this.state = {
-      langs: langs,
-      scores: scores,
-    }
-
+    this.state = {score: store};
   }
-
   handleClick(lang) {
-    
-    let newScore = Object.assign(this.state.scores, {
-      [lang]: this.state.scores[lang] +1
-    })
-    this.setState({scores: newScore})
-    console.log(`${lang} has been clicked ${this.state.scores} times.`)
-  }
-  
-  getList() {
-    return this.state.langs.map(i => {
-      return <Item lang={i} 
-                   c={this.handleClick.bind(this)}/>
-    });
-  }
+    // functional way
+    // var newState = Object.assign({}, this.state, {[lang]: this.state[lang] + 1})
 
-  showScore(){
-    console.log(this.state.scores)
+    var index = this.state.score.findIndex(item => {
+      return item.name == lang
+    })
+    var newScore = this.state.score
+    newScore[index].score += 1
+    this.setState({score: newScore})
+  }
+  showScores() {
+    return this.state.score.map(item => {
+      return <span key={item.id}>{item.name}: {item.score}<br /></span>
+    })
+    // return Object.keys(this.state).map(k => {
+    //   return <span>{k}: {this.state[k]}  </span>
+    // })
+  }
+  showList() {
+    return this.state.score.map(item => {
+      return <Item lang={item}
+                   clickCallback={this.handleClick.bind(this)} />
+    })
+    // return Object.keys(this.state).map(k =>{
+    //   return <Item lang={k}
+    //                clickCallback={this.handleClick.bind(this)} />
+    // });
   }
 
   render() {
     return (
       <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2 onClick = {this.handleClick}> Welcome to React</h2>
-
-        </div>
         <div>
           <ul>
-            {this.getList()}
+            {this.showList()}
           </ul>
         </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-        {this.showScore()}
+        {this.showScores()}
       </div>
     );
   }
